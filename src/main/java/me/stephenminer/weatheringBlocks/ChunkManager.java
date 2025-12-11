@@ -56,7 +56,6 @@ public class ChunkManager implements Listener {
                 int x = random.nextInt(16);
                 int z = random.nextInt(16);
                 Material mat = chunk.getBlockType(x, y, z);
-                System.out.println(mat.name());
                 if (!plugin.transitions.containsKey(mat)) continue;
 
                 BlockTransitions transition = plugin.transitions.get(mat);
