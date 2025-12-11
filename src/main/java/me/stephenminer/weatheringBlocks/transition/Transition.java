@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-public record Transition(Material target, float baseChance, ProbabilityFlag[] flags) {
+public record Transition(Material target, float baseChance, boolean groupingDelay, ProbabilityFlag[] flags) {
 
 
     public float realChance(Location center){
@@ -26,6 +26,7 @@ public record Transition(Material target, float baseChance, ProbabilityFlag[] fl
                 for (int z = center.getBlockZ() - flag.range(); z <= center.getBlockZ() + flag.range(); z++){
                     if (x == center.getBlockX() && y == center.getBlockY() && z == center.getBlockZ())
                         continue;
+                    if (Math.abs(center.getBlockX() - x) + Math.abs(center.getBlockY() - y) + Math.abs(center.getBlockZ() - z) > flag.range()) continue;
                     Block block = world.getBlockAt(x,y,z);
                     if (flag.mat() == block.getType())
                         found++;

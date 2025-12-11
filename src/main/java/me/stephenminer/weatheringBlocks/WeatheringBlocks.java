@@ -13,6 +13,7 @@ import java.util.*;
 
 public final class WeatheringBlocks extends JavaPlugin {
     public Map<Material, BlockTransitions> transitions;
+    public Map<String, List<BlockTransitions>> transitionGroups;
 
     public ChunkManager manager;
 
@@ -24,6 +25,14 @@ public final class WeatheringBlocks extends JavaPlugin {
         transitions = new HashMap<>();
         transitionFile = new ConfigFile(this, "blocks");
         loadTransitions();
+
+        transitionGroups = new HashMap<>();
+        for (BlockTransitions blockTransition : transitions.values()){
+            String group = blockTransition.group();
+            if (!transitionGroups.containsKey(group))
+                transitionGroups.put(group, new ArrayList<>());
+            transitionGroups.get(group).add(blockTransition);
+        }
         manager = new ChunkManager();
         manager.start();
     }
@@ -46,6 +55,18 @@ public final class WeatheringBlocks extends JavaPlugin {
                 continue;
             }
             float preChance = (float) this.transitionFile.getConfig().getDouble("transitions." + key + ".pre-chance");
+            String group = "general";
+            int stage = 0;
+            boolean lowerTransitionBlocking = false;
+            if (this.transitionFile.getConfig().contains("transitions." + key + ".group")) {
+                String raw = this.transitionFile.getConfig().getString("transitions." + key + ".group").strip().toLowerCase();
+                String[] groupSettings = raw.split(",");
+                group = groupSettings[0].strip().toLowerCase();
+                if (groupSettings.length >= 2)
+                    stage = Integer.parseInt(groupSettings[1].strip().toLowerCase());
+                if (groupSettings.length >= 3)
+                    lowerTransitionBlocking = Boolean.parseBoolean(groupSettings[2].strip().toLowerCase());
+            }
             List<String> rawTransitions = this.transitionFile.getConfig().getStringList("transitions." + key + ".states");
             for (String rawTransition : rawTransitions){
                 String[] unbox = rawTransition.split(",");
@@ -70,27 +91,33 @@ public final class WeatheringBlocks extends JavaPlugin {
                // flagCache.clear();
                 int defaultRange = 4;
                 boolean defaultRatio = false;
-                for (int i = 2; i < Math.min(4, unbox.length); i++){
-                    String item = unbox[i].strip();
+                boolean groupingDelay = true;
+                for (int i = 2; i < Math.min(5, unbox.length); i++){
+                    String item = unbox[i].strip().toLowerCase();
                     if (item.contains("ratio;"))
                         defaultRatio = Boolean.parseBoolean(item.split(";")[1]);
                     if (item.contains("range;"))
                         defaultRange = Integer.parseInt(item.split(";")[1]);
+                    if (item.contains("grouping-delay;"))
+                        groupingDelay = Boolean.parseBoolean(item.split(";")[1]);
                 }
-                for (int i = 4; i < unbox.length; i++){
+                for (int i = 2; i < unbox.length; i++){
+                    String item = unbox[i].strip().toLowerCase();
+                    if (item.contains("ratio;") || item.contains("range;") || item.contains("grouping-delay;")) continue;
                     ProbabilityFlag flag = ProbabilityFlag.parseFlag(unbox[i], defaultRange, defaultRatio);
                     if (flag != null)
                         flagCache.add(flag);
                 }
-                Transition transition = new Transition(transitionMat, chance, flagCache.toArray(new ProbabilityFlag[0]));
+                Transition transition = new Transition(transitionMat, chance, groupingDelay, flagCache.toArray(new ProbabilityFlag[0]));
                 transitionCache.add(transition);
                 flagCache.clear();
             }
-            BlockTransitions blockSates = new BlockTransitions(parentMaterial,preChance,transitionCache.toArray(new Transition[0]));
+            BlockTransitions blockSates = new BlockTransitions(group, stage, lowerTransitionBlocking, parentMaterial,preChance,transitionCache.toArray(new Transition[0]));
             this.transitions.put(parentMaterial, blockSates);
             transitionCache.clear();
         }
     }
+
 
     public Material materialFromString(String str){
         str = str.toLowerCase().strip();
