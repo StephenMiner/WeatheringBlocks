@@ -66,7 +66,8 @@ public class BlockTransitions {
                 for (int y = loc.getBlockY() - 4; y <= loc.getBlockY() + 4; y++){
                     if (x == loc.getBlockX() && y == loc.getBlockY() && z == loc.getBlockZ())
                         continue;
-                    if (Math.abs(loc.getBlockX() - x) + Math.abs(loc.getBlockY() - y) + Math.abs(loc.getBlockZ() - z) > 4) continue;
+                    if (Math.abs(loc.getBlockX() - x) + Math.abs(loc.getBlockY() - y) + Math.abs(loc.getBlockZ() - z) > 4)
+                        continue;
                     Material mat = world.getBlockAt(x, y, z).getType();
                     if (plugin.transitions.containsKey(mat)){
                         BlockTransitions blockTransition = plugin.transitions.get(mat);
@@ -82,7 +83,7 @@ public class BlockTransitions {
             }
         }
         float f = (k + 1) / (float) (k + j + 1);
-       // System.out.println(f);
+        System.out.println(f);
         return f * f;
     }
 
@@ -95,16 +96,19 @@ public class BlockTransitions {
         float groupMod = findGroupMod(loc);
         float sum = 0;
         Material next = parent;
+        //calculate total probability
         for (int i = 0; i < transitions.length; i++){
             Transition transition = transitions[i];
             sum += transition.realChance(loc);
-            if (transition.groupingDelay())
-                sum *= groupMod;
-            if (parent == Material.STONE_BRICKS)
-                System.out.println(sum);
+        }
+        if (roll >= groupMod * sum) return next;
+        roll = random.nextFloat(sum);
+        sum = 0;
+        for (int i = 0; i < transitions.length; i++){
+            Transition transition = transitions[i];
+            sum += transition.realChance(loc);
             if (roll >= sum) continue;
             next = transition.target();
-
             break;
         }
         return next;
