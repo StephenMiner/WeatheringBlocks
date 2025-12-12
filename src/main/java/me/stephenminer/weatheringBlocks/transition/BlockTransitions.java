@@ -22,14 +22,14 @@ public class BlockTransitions {
 
     private final Material parent;
     private final Transition[] transitions;
-    private final float preChance;
+    private final float preChance, chance;
     private final String group;
     private final int stage;
     private final boolean lowerTransitionBlocking;
 
-    public BlockTransitions(String group, int stage, boolean lowerTransitionBlocking, Material parent, float preChance, Transition[] transitions){
+    public BlockTransitions(String group, int stage, boolean lowerTransitionBlocking, Material parent, float preChance, float chance, Transition[] transitions){
         this.plugin = JavaPlugin.getPlugin(WeatheringBlocks.class);
-
+        this.chance = chance;
         this.group = group;
         this.parent = parent;
         this.preChance = preChance;
@@ -39,7 +39,7 @@ public class BlockTransitions {
     }
 
     public BlockTransitions(Material parent, float preChance, Transition[] transitions){
-        this("general", 1, false, parent, preChance, transitions);
+        this("general", 1, false, parent, preChance,1, transitions);
     }
 
 
@@ -83,7 +83,6 @@ public class BlockTransitions {
             }
         }
         float f = (k + 1) / (float) (k + j + 1);
-        System.out.println(f);
         return f * f;
     }
 
@@ -97,16 +96,20 @@ public class BlockTransitions {
         float sum = 0;
         Material next = parent;
         //calculate total probability
+        if (roll >= groupMod * chance) return next;
+        float[] probabilities = new float[transitions.length];
         for (int i = 0; i < transitions.length; i++){
             Transition transition = transitions[i];
-            sum += transition.realChance(loc);
+            probabilities[i] = transition.realChance(loc);
+            sum += probabilities[i];
+
         }
-        if (roll >= groupMod * sum) return next;
+
         roll = random.nextFloat(sum);
         sum = 0;
         for (int i = 0; i < transitions.length; i++){
             Transition transition = transitions[i];
-            sum += transition.realChance(loc);
+            sum += probabilities[i];
             if (roll >= sum) continue;
             next = transition.target();
             break;
@@ -117,4 +120,5 @@ public class BlockTransitions {
     public String group(){ return group; }
     public int stage(){ return stage; }
     public boolean lowerTransitionBlocking(){ return lowerTransitionBlocking; }
+    public float chance(){ return chance; }
 }

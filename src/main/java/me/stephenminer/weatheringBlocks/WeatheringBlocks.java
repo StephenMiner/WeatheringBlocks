@@ -55,6 +55,7 @@ public final class WeatheringBlocks extends JavaPlugin {
                 continue;
             }
             float preChance = (float) this.transitionFile.getConfig().getDouble("transitions." + key + ".pre-chance");
+            float chance = (float) this.transitionFile.getConfig().getDouble("transitions." + key + ".chance");
             String group = "general";
             int stage = 0;
             boolean lowerTransitionBlocking = false;
@@ -81,9 +82,9 @@ public final class WeatheringBlocks extends JavaPlugin {
                     continue;
                 }
                 String chanceStr = unbox[1].trim();
-                float chance;
+                float weight;
                 try{
-                    chance = Float.parseFloat(chanceStr);
+                    weight = Float.parseFloat(chanceStr);
                 }catch (Exception e){
                     this.getLogger().warning("Skipping potential transition: " + rawTransition + ", " + chanceStr + " is not a proper probability number (in the range 0 - 1)");
                     continue;
@@ -108,11 +109,11 @@ public final class WeatheringBlocks extends JavaPlugin {
                     if (flag != null)
                         flagCache.add(flag);
                 }
-                Transition transition = new Transition(transitionMat, chance, groupingDelay, flagCache.toArray(new ProbabilityFlag[0]));
+                Transition transition = new Transition(transitionMat, weight, groupingDelay, flagCache.toArray(new ProbabilityFlag[0]));
                 transitionCache.add(transition);
                 flagCache.clear();
             }
-            BlockTransitions blockSates = new BlockTransitions(group, stage, lowerTransitionBlocking, parentMaterial,preChance,transitionCache.toArray(new Transition[0]));
+            BlockTransitions blockSates = new BlockTransitions(group, stage, lowerTransitionBlocking, parentMaterial,preChance,chance, transitionCache.toArray(new Transition[0]));
             this.transitions.put(parentMaterial, blockSates);
             transitionCache.clear();
         }

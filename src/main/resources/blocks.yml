@@ -2,28 +2,33 @@ transitions:
   stone_bricks:
     group: stone,1,true
     pre-chance: 0.05688889
+    chance: 0.75
     states:
-    - "cracked_stone_bricks, 0.5, range;4, water;-0.3;true, flowing_water;-0.3;true"
-    - "mossy_stone_bricks, 0.2, range;4, ratio;true, water;0.3, flowing_water;0.3"
+    - "cracked_stone_bricks, 0.8, range;4, water;-0.6;true"
+    - "mossy_stone_bricks, 0.2, range;4, ratio;true, water;0.6"
   cracked_stone_bricks:
     group: stone,2
     pre-chance: 0.05688889
+    chance: 0.7
     states:
-    - "cobblestone, 0.5, water;-0.3, flowing_water;0.3"
-    - "mossy_cobblestone, 0.2, water;0.3, flowing_water;0.3"
+    - "cobblestone, 0.8, water;-0.6"
+    - "mossy_cobblestone, 0.2, water;0.6"
   mossy_stone_bricks:
     group: stone,2
     pre-chance: 0.05688889
+    chance: 0.75
     states:
-    - "mossy_cobblestone, 0.75"
+    - "mossy_cobblestone, 1"
   cobblestone:
     group: stone,3,true
     pre-chance: 0.05688889
+    chance: 0.2
     states:
-    - "gravel, 0.2"
+    - "gravel, 1"
   mossy_cobblestone:
     group: stone,3,true
     pre-chance: 0.05688889
+    chance: 0.1
     states:
-    - "gravel, 0.1, water;-0.1, flowing_water;-0.1"
-    - "moss_block, 0.1, water;0.1, flowing_water;0.1"
+    - "gravel, 0.95, water;-0.95"
+    - "moss_block, 0.05, water;0.95"
