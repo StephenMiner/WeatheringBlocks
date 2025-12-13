@@ -96,6 +96,8 @@ public class BlockTransitions {
         Material next = parent;
         //calculate total probability
         float proabability = groupingDelay ? groupMod * chance : chance;
+     //   if (parent == Material.STONE_BRICKS)
+      //      System.out.println("gd:" + groupingDelay + ", " + "g:" + groupMod + "," + chance + "," +proabability);
         if (roll >= proabability) return next;
         float[] probabilities = new float[transitions.length];
         for (int i = 0; i < transitions.length; i++){
