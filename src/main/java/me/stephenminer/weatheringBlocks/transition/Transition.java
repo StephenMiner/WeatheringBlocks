@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-public record Transition(Material target, float baseChance, boolean groupingDelay, ProbabilityFlag[] flags) {
+public record Transition(Material target, float baseChance, ProbabilityFlag[] flags) {
 
 
     public float realChance(Location center){

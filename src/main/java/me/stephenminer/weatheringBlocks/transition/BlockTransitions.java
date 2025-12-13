@@ -6,14 +6,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Random;
 
 
@@ -25,9 +23,9 @@ public class BlockTransitions {
     private final float preChance, chance;
     private final String group;
     private final int stage;
-    private final boolean lowerTransitionBlocking;
+    private final boolean lowerTransitionBlocking, groupingDelay;
 
-    public BlockTransitions(String group, int stage, boolean lowerTransitionBlocking, Material parent, float preChance, float chance, Transition[] transitions){
+    public BlockTransitions(String group, int stage, boolean groupingDelay, boolean lowerTransitionBlocking, Material parent, float preChance, float chance, Transition[] transitions){
         this.plugin = JavaPlugin.getPlugin(WeatheringBlocks.class);
         this.chance = chance;
         this.group = group;
@@ -36,10 +34,11 @@ public class BlockTransitions {
         this.transitions = transitions;
         this.stage = stage;
         this.lowerTransitionBlocking = lowerTransitionBlocking;
+        this.groupingDelay = groupingDelay;
     }
 
     public BlockTransitions(Material parent, float preChance, Transition[] transitions){
-        this("general", 1, false, parent, preChance,1, transitions);
+        this("general", 1, true,  true, parent, preChance,1, transitions);
     }
 
 
@@ -96,7 +95,8 @@ public class BlockTransitions {
         float sum = 0;
         Material next = parent;
         //calculate total probability
-        if (roll >= groupMod * chance) return next;
+        float proabability = groupingDelay ? groupMod * chance : chance;
+        if (roll >= proabability) return next;
         float[] probabilities = new float[transitions.length];
         for (int i = 0; i < transitions.length; i++){
             Transition transition = transitions[i];

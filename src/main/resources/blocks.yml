@@ -1,6 +1,6 @@
 transitions:
   stone_bricks:
-    group: stone,1,true
+    group: stone,1,true,true
     pre-chance: 0.05688889
     chance: 0.75
     states:

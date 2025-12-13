@@ -58,7 +58,8 @@ public final class WeatheringBlocks extends JavaPlugin {
             float chance = (float) this.transitionFile.getConfig().getDouble("transitions." + key + ".chance");
             String group = "general";
             int stage = 0;
-            boolean lowerTransitionBlocking = false;
+            boolean groupingDelay = true;
+            boolean lowerTransitionBlocking = true;
             if (this.transitionFile.getConfig().contains("transitions." + key + ".group")) {
                 String raw = this.transitionFile.getConfig().getString("transitions." + key + ".group").strip().toLowerCase();
                 String[] groupSettings = raw.split(",");
@@ -66,7 +67,9 @@ public final class WeatheringBlocks extends JavaPlugin {
                 if (groupSettings.length >= 2)
                     stage = Integer.parseInt(groupSettings[1].strip().toLowerCase());
                 if (groupSettings.length >= 3)
-                    lowerTransitionBlocking = Boolean.parseBoolean(groupSettings[2].strip().toLowerCase());
+                    groupingDelay = Boolean.parseBoolean(groupSettings[2].strip().toLowerCase());
+                if (groupSettings.length >= 4)
+                    lowerTransitionBlocking = Boolean.parseBoolean(groupSettings[3].strip().toLowerCase());
             }
             List<String> rawTransitions = this.transitionFile.getConfig().getStringList("transitions." + key + ".states");
             for (String rawTransition : rawTransitions){
@@ -92,28 +95,25 @@ public final class WeatheringBlocks extends JavaPlugin {
                // flagCache.clear();
                 int defaultRange = 4;
                 boolean defaultRatio = false;
-                boolean groupingDelay = true;
                 for (int i = 2; i < Math.min(5, unbox.length); i++){
                     String item = unbox[i].strip().toLowerCase();
                     if (item.contains("ratio;"))
                         defaultRatio = Boolean.parseBoolean(item.split(";")[1]);
                     if (item.contains("range;"))
                         defaultRange = Integer.parseInt(item.split(";")[1]);
-                    if (item.contains("grouping-delay;"))
-                        groupingDelay = Boolean.parseBoolean(item.split(";")[1]);
                 }
                 for (int i = 2; i < unbox.length; i++){
                     String item = unbox[i].strip().toLowerCase();
-                    if (item.contains("ratio;") || item.contains("range;") || item.contains("grouping-delay;")) continue;
+                    if (item.contains("ratio;") || item.contains("range;")) continue;
                     ProbabilityFlag flag = ProbabilityFlag.parseFlag(unbox[i], defaultRange, defaultRatio);
                     if (flag != null)
                         flagCache.add(flag);
                 }
-                Transition transition = new Transition(transitionMat, weight, groupingDelay, flagCache.toArray(new ProbabilityFlag[0]));
+                Transition transition = new Transition(transitionMat, weight,  flagCache.toArray(new ProbabilityFlag[0]));
                 transitionCache.add(transition);
                 flagCache.clear();
             }
-            BlockTransitions blockSates = new BlockTransitions(group, stage, lowerTransitionBlocking, parentMaterial,preChance,chance, transitionCache.toArray(new Transition[0]));
+            BlockTransitions blockSates = new BlockTransitions(group, stage, groupingDelay, lowerTransitionBlocking, parentMaterial,preChance,chance, transitionCache.toArray(new Transition[0]));
             this.transitions.put(parentMaterial, blockSates);
             transitionCache.clear();
         }
