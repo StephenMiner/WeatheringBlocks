@@ -1,5 +1,6 @@
 package me.stephenminer.weatheringBlocks;
 
+import me.stephenminer.weatheringBlocks.listener.WaxStorage;
 import me.stephenminer.weatheringBlocks.transition.BlockTransitions;
 import me.stephenminer.weatheringBlocks.transition.ProbabilityFlag;
 import me.stephenminer.weatheringBlocks.transition.Transition;
@@ -7,6 +8,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
@@ -14,18 +16,23 @@ import java.util.*;
 public final class WeatheringBlocks extends JavaPlugin {
     public Map<Material, BlockTransitions> transitions;
     public Map<String, List<BlockTransitions>> transitionGroups;
+    public Set<String> blacklistedWorlds;
 
     public ChunkManager manager;
 
     public ConfigFile transitionFile;
+    public ConfigFile settingsFile;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
+        registerEvents();
+        this.blacklistedWorlds = new HashSet<>();
         transitions = new HashMap<>();
         transitionFile = new ConfigFile(this, "blocks");
+        this.settingsFile = new ConfigFile(this, "settings");
         loadTransitions();
-
+        loadBlacklist();
         transitionGroups = new HashMap<>();
         for (BlockTransitions blockTransition : transitions.values()){
             String group = blockTransition.group();
@@ -35,6 +42,15 @@ public final class WeatheringBlocks extends JavaPlugin {
         }
         manager = new ChunkManager();
         manager.start();
+    }
+
+    private void registerEvents(){
+        PluginManager pm = this.getServer().getPluginManager();
+        pm.registerEvents(new WaxStorage(), this);
+    }
+
+    private void loadBlacklist(){
+        this.blacklistedWorlds = new HashSet<>(this.settingsFile.getConfig().getStringList("blacklist-worlds"));
     }
 
     @Override
