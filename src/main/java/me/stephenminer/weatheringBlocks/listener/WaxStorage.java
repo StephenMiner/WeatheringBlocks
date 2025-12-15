@@ -14,8 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class WaxStorage implements Listener {
     private final NamespacedKey key;
@@ -50,37 +48,35 @@ public class WaxStorage implements Listener {
             if (!plugin.transitions.containsKey(b.getType())) return;
             b.setMetadata("weathering-waxed", new FixedMetadataValue(plugin, true));
         }
-        System.out.println("Reading data from chunk");
-        try {
-            inputStream.close();
-        }catch (Exception ignored){}
     }
 
     public void writeChunkData(Chunk chunk){
         World world = chunk.getWorld();
-        List<Integer> positions = new ArrayList<>();
         PersistentDataContainer container = chunk.getPersistentDataContainer();
-        for (int y = world.getMinHeight(); y < world.getMaxHeight(); y++){
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream(128);
+        String metaKey = "weathering-waxed";
+        ChunkSnapshot snapshot = chunk.getChunkSnapshot();
+        int maxY = world.getMaxHeight();
+        int minY = world.getMinHeight();
+        long start = System.nanoTime();
+        for (int y = maxY; y < minY; y++){
             for (int x = 0; x < 16; x++){
                 for (int z = 0; z < 16; z++){
+                    Material mat = snapshot.getBlockType(x, y, z);
+                    if (mat.isAir() || !plugin.transitions.containsKey(mat)) continue;
                     Block b = chunk.getBlock(x, y, z);
-                    if (b.hasMetadata("weathering-waxed"))
-                        positions.add(packPosition(b.getLocation()));
+                    if (b.hasMetadata(metaKey))
+                        outStream.write(packPosition(b.getLocation()));
                 }
             }
         }
-        if (positions.isEmpty() && container.has(key, PersistentDataType.BYTE_ARRAY)) {
+        if (outStream.size() == 0 && container.has(key, PersistentDataType.BYTE_ARRAY)) {
             container.remove(key);
             return;
         }
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        for (Integer pos : positions)
-            outStream.write(pos);
         container.set(key, PersistentDataType.BYTE_ARRAY, outStream.toByteArray());
-        System.out.println("Writing data to chunk");
-        try{
-            outStream.close();
-        }catch (Exception ignored){}
+        long end =  System.nanoTime();
+        System.out.println("Finished write after " + (end - start));
 
     }
 

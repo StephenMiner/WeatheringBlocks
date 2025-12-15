@@ -1,5 +1,6 @@
 package me.stephenminer.weatheringBlocks;
 
+import me.stephenminer.weatheringBlocks.listener.WaxStorage;
 import me.stephenminer.weatheringBlocks.transition.BlockTransitions;
 import org.bukkit.*;
 import org.bukkit.event.Listener;
@@ -37,6 +38,14 @@ public class ChunkManager implements Listener {
 
     public void stop(){
         stop = true;
+    }
+
+    public void saveAll(World world){
+        Chunk[] chunks = world.getLoadedChunks();
+        WaxStorage waxStorage = new WaxStorage();
+        for (Chunk chunk : chunks){
+            waxStorage.writeChunkData(chunk);
+        }
     }
 
     public void tickChunks(World world){

@@ -7,9 +7,7 @@ import me.stephenminer.weatheringBlocks.transition.ProbabilityFlag;
 import me.stephenminer.weatheringBlocks.transition.Transition;
 
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
+import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -73,6 +71,11 @@ public final class WeatheringBlocks extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        for (World world : Bukkit.getWorlds()){
+            if (blacklistedWorlds.contains(world.getName())) continue;
+            manager.saveAll(world);
+        }
+        blacklistedWorlds.clear();
         transitions.clear();
         manager.stop();
     }
