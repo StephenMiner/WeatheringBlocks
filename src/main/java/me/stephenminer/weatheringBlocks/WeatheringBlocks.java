@@ -4,19 +4,29 @@ import me.stephenminer.weatheringBlocks.listener.WaxStorage;
 import me.stephenminer.weatheringBlocks.transition.BlockTransitions;
 import me.stephenminer.weatheringBlocks.transition.ProbabilityFlag;
 import me.stephenminer.weatheringBlocks.transition.Transition;
-import org.bukkit.Chunk;
+
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nullable;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class WeatheringBlocks extends JavaPlugin {
+    public static Pattern HEX_PATTERN = Pattern.compile("(#[A-Fa-f0-9]{6})");
     public Map<Material, BlockTransitions> transitions;
     public Map<String, List<BlockTransitions>> transitionGroups;
     public Set<String> blacklistedWorlds;
+
+    public NamespacedKey itemKey;
 
     public ChunkManager manager;
 
@@ -31,6 +41,9 @@ public final class WeatheringBlocks extends JavaPlugin {
         transitions = new HashMap<>();
         transitionFile = new ConfigFile(this, "blocks");
         this.settingsFile = new ConfigFile(this, "settings");
+
+        this.itemKey = new NamespacedKey(this, "weathering-item");
+
         loadTransitions();
         loadBlacklist();
         transitionGroups = new HashMap<>();
@@ -135,7 +148,7 @@ public final class WeatheringBlocks extends JavaPlugin {
         }
     }
 
-
+    @Nullable
     public Material materialFromString(String str){
         str = str.toLowerCase().strip();
         Material mat = null;
@@ -152,5 +165,36 @@ public final class WeatheringBlocks extends JavaPlugin {
             JavaPlugin.getPlugin(WeatheringBlocks.class).getLogger().warning("Failed to generate material from: " + str );
         }
         return mat;
+    }
+
+    public ItemStack constructGlue(){
+        if (!this.settingsFile.getConfig().contains("glue")) return null;
+        String matStr = this.settingsFile.getConfig().getString("glue.name");
+        Material type = materialFromString(matStr);
+        if (type == null){
+            this.getLogger().warning("Failed to parse material " + matStr + ".");
+            return null;
+        }
+        String name = formatColor(ChatColor.translateAlternateColorCodes('&', this.settingsFile.getConfig().getString("glue.name")));
+        List<String> lore = new ArrayList<>();
+        List<String> temp = this.settingsFile.getConfig().getStringList("glue.lore");
+        for (String str : temp){
+            lore.add(formatColor(ChatColor.translateAlternateColorCodes('&', str)));
+        }
+        ItemStack item = new ItemStack(type);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(name);
+        meta.setLore(lore);
+        meta.getPersistentDataContainer().set(this.itemKey, PersistentDataType.STRING, "glue");
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public String formatColor(String str){
+        if (str == null) return null;
+        Matcher matcher = HEX_PATTERN.matcher(str);
+        while (matcher.find())
+            str = str.replace(matcher.group(), "" + ChatColor.of(matcher.group()));
+        return str;
     }
 }

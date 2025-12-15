@@ -1,2 +1,8 @@
 blacklist-worlds:
   - "example world"
+glue:
+  name: "name"
+  lore:
+    - "lore"
+    - "lore2"
+  type: "minecraft:gray_dye"
