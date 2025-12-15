@@ -6,3 +6,5 @@ glue:
     - "lore"
     - "lore2"
   type: "minecraft:gray_dye"
+  effect-area: 4
+  full-repair: true

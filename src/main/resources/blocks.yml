@@ -8,6 +8,7 @@ transitions:
     - "mossy_stone_bricks, 0.2, range;4, ratio;true, water;0.6"
   cracked_stone_bricks:
     group: stone,2
+    repairs: stone_bricks
     pre-chance: 0.05688889
     chance: 0.7
     states:
@@ -15,6 +16,7 @@ transitions:
     - "mossy_cobblestone, 0.2, water;0.6"
   mossy_stone_bricks:
     group: stone,2
+    repairs: stone_bricks
     pre-chance: 0.05688889
     chance: 0.75
     states:
@@ -27,6 +29,7 @@ transitions:
     - "gravel, 1"
   mossy_cobblestone:
     group: stone,3,true
+    repairs: mossy_stone_bricks
     pre-chance: 0.05688889
     chance: 0.1
     states:

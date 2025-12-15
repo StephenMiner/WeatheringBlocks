@@ -1,5 +1,6 @@
 package me.stephenminer.weatheringBlocks;
 
+import me.stephenminer.weatheringBlocks.listener.RepairBlocks;
 import me.stephenminer.weatheringBlocks.listener.WaxStorage;
 import me.stephenminer.weatheringBlocks.transition.BlockTransitions;
 import me.stephenminer.weatheringBlocks.transition.ProbabilityFlag;
@@ -53,6 +54,8 @@ public final class WeatheringBlocks extends JavaPlugin {
                 transitionGroups.put(group, new ArrayList<>());
             transitionGroups.get(group).add(blockTransition);
         }
+        for (List<BlockTransitions> groups : transitionGroups.values())
+            groups.sort(Comparator.comparingInt(BlockTransitions::stage));
         manager = new ChunkManager();
         manager.start();
     }
@@ -60,6 +63,7 @@ public final class WeatheringBlocks extends JavaPlugin {
     private void registerEvents(){
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new WaxStorage(), this);
+        pm.registerEvents(new RepairBlocks(),this);
     }
 
     private void loadBlacklist(){
@@ -143,6 +147,11 @@ public final class WeatheringBlocks extends JavaPlugin {
                 flagCache.clear();
             }
             BlockTransitions blockSates = new BlockTransitions(group, stage, groupingDelay, lowerTransitionBlocking, parentMaterial,preChance,chance, transitionCache.toArray(new Transition[0]));
+            if (this.transitionFile.getConfig().contains("transitions." + key + ".repairs")){
+                Material repairsTo = this.materialFromString(this.transitionFile.getConfig().getString("transitions." + key + ".repairs"));
+                blockSates.setRepairTo(repairsTo);
+            }
+
             this.transitions.put(parentMaterial, blockSates);
             transitionCache.clear();
         }
@@ -196,5 +205,12 @@ public final class WeatheringBlocks extends JavaPlugin {
         while (matcher.find())
             str = str.replace(matcher.group(), "" + ChatColor.of(matcher.group()));
         return str;
+    }
+
+    public boolean glueFullRepair(){
+        return this.settingsFile.getConfig().getBoolean("settings.glue.full-repair");
+    }
+    public int glueArea(){
+        return this.settingsFile.getConfig().getInt("settings.glue.effect-area");
     }
 }

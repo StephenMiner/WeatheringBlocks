@@ -47,6 +47,7 @@ public class WaxStorage implements Listener {
         while (inputStream.available() > 0) {
             int data = inputStream.read();
             Block b = unpackPosition(chunk, data);
+            if (!plugin.transitions.containsKey(b.getType())) return;
             b.setMetadata("weathering-waxed", new FixedMetadataValue(plugin, true));
         }
         System.out.println("Reading data from chunk");

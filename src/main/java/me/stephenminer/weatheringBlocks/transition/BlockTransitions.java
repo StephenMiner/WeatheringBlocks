@@ -25,6 +25,8 @@ public class BlockTransitions {
     private final int stage;
     private final boolean lowerTransitionBlocking, groupingDelay;
 
+    private Material repairTo;
+
     public BlockTransitions(String group, int stage, boolean groupingDelay, boolean lowerTransitionBlocking, Material parent, float preChance, float chance, Transition[] transitions){
         this.plugin = JavaPlugin.getPlugin(WeatheringBlocks.class);
         this.chance = chance;
@@ -119,8 +121,16 @@ public class BlockTransitions {
         return next;
     }
 
+    public Material parent(){ return parent; }
     public String group(){ return group; }
     public int stage(){ return stage; }
     public boolean lowerTransitionBlocking(){ return lowerTransitionBlocking; }
     public float chance(){ return chance; }
+
+    // may be null
+    public Material repairTo(){ return repairTo; }
+
+    public void setRepairTo(Material repairTo){
+        this.repairTo = repairTo;
+    }
 }
