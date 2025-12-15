@@ -38,6 +38,7 @@ public final class WeatheringBlocks extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         registerEvents();
+        addCommands();
         this.blacklistedWorlds = new HashSet<>();
         transitions = new HashMap<>();
         transitionFile = new ConfigFile(this, "blocks");
@@ -58,6 +59,10 @@ public final class WeatheringBlocks extends JavaPlugin {
             groups.sort(Comparator.comparingInt(BlockTransitions::stage));
         manager = new ChunkManager();
         manager.start();
+
+        for (World world : Bukkit.getWorlds()){
+            manager.loadAll(world);
+        }
     }
 
     private void registerEvents(){
@@ -237,5 +242,17 @@ public final class WeatheringBlocks extends JavaPlugin {
             if (temp.contains(match)) out.add(temp);
         }
         return out;
+    }
+
+    public int[] unboxVersionStr(){
+        String verStr = Bukkit.getServer().getVersion();
+        verStr = verStr.substring(verStr.indexOf("(MC: ")).replace("(MC: ","");
+        verStr = verStr.substring(0, verStr.length() - 1);
+        String[] comps = verStr.split("\\.");
+        int[] verComps = new int[comps.length];
+        for (int i = 0; i < verComps.length; i++){
+            verComps[i] = Integer.parseInt(comps[i]);
+        }
+        return verComps;
     }
 }

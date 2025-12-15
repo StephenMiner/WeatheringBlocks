@@ -2,7 +2,7 @@ name: WeatheringBlocks
 version: '1.0-SNAPSHOT'
 main: me.stephenminer.weatheringBlocks.WeatheringBlocks
 api-version: '1.16'
-load: STARTUP
+load: POSTWORLD
 commands:
   waxify:
   weatheringitem:

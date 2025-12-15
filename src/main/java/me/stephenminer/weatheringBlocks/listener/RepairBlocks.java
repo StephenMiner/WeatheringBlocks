@@ -35,16 +35,22 @@ public class RepairBlocks implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (!event.hasItem()) return;
         ItemStack item = event.getItem();
-        if (item.getType() != Material.HONEY_BLOCK) return;
+        if (item.getType() != Material.HONEYCOMB) return;
         Block block = event.getClickedBlock();
         Material type = block.getType();
         if (!plugin.transitions.containsKey(type)) return;
+        Player player = event.getPlayer();
+        if (block.hasMetadata("weathering-waxed")) {
+            player.sendMessage(ChatColor.YELLOW + "This block is already waxed!");
+            return;
+        }
         block.setMetadata("weathering-waxed", new FixedMetadataValue(plugin, true));
+        item.setAmount(item.getAmount() - 1);
     }
 
     @EventHandler
     public void waxOff(PlayerInteractEvent event){
-        Bukkit.broadcastMessage(Bukkit.getServer().getVersion());
+       // Bukkit.broadcastMessage(Bukkit.getServer().getVersion());
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (!event.hasItem()) return;
         ItemStack item = event.getItem();
@@ -53,7 +59,11 @@ public class RepairBlocks implements Listener {
         if (!plugin.transitions.containsKey(block.getType()) || !block.hasMetadata("weathering-waxed")) return;
         block.removeMetadata("weathering-waxed", plugin);
         World world = block.getWorld();
-        world.playEffect(block.getLocation(), Effect.COPPER_WAX_OFF, 1);
+        int[] version = plugin.unboxVersionStr();
+        Location loc = block.getLocation();
+        if (version.length >= 2 && version[1] > 17)
+            world.playEffect(loc, Effect.COPPER_WAX_OFF, 5);
+        else world.spawnParticle(Particle.SMOKE, loc.clone().add(0.5,1,0.5), 50);
     }
 
     private boolean isAxe(Material mat){

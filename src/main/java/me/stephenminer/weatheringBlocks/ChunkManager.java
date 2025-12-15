@@ -48,6 +48,14 @@ public class ChunkManager implements Listener {
         }
     }
 
+    public void loadAll(World world){
+        Chunk[] chunks = world.getLoadedChunks();
+        WaxStorage waxStorage = new WaxStorage();
+        for (Chunk chunk : chunks){
+            waxStorage.readChunkData(chunk);
+        }
+    }
+
     public void tickChunks(World world){
         int randomTick = world.getGameRuleValue(GameRule.RANDOM_TICK_SPEED);
         Chunk[] chunks = world.getLoadedChunks();

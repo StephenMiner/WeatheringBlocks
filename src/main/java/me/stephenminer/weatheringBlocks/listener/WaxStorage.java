@@ -42,8 +42,12 @@ public class WaxStorage implements Listener {
         if (!container.has(key, PersistentDataType.BYTE_ARRAY)) return;
         byte[] posArr = container.get(key, PersistentDataType.BYTE_ARRAY);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(posArr);
-        while (inputStream.available() > 0) {
-            int data = inputStream.read();
+        while (inputStream.available() > 2) {
+            System.out.println(22);
+            int d1 = inputStream.read();
+            int d2 = inputStream.read();
+            int d3 = inputStream.read();
+            int data = (d1 << 16) | (d2 << 8) | d3;
             Block b = unpackPosition(chunk, data);
             if (!plugin.transitions.containsKey(b.getType())) return;
             b.setMetadata("weathering-waxed", new FixedMetadataValue(plugin, true));
@@ -58,15 +62,19 @@ public class WaxStorage implements Listener {
         ChunkSnapshot snapshot = chunk.getChunkSnapshot();
         int maxY = world.getMaxHeight();
         int minY = world.getMinHeight();
-        long start = System.nanoTime();
-        for (int y = maxY; y < minY; y++){
+        long start = System.currentTimeMillis();
+        for (int y = minY; y < maxY; y++){
             for (int x = 0; x < 16; x++){
                 for (int z = 0; z < 16; z++){
                     Material mat = snapshot.getBlockType(x, y, z);
+                    //plugin.getLogger().info(mat.name());
                     if (mat.isAir() || !plugin.transitions.containsKey(mat)) continue;
                     Block b = chunk.getBlock(x, y, z);
-                    if (b.hasMetadata(metaKey))
-                        outStream.write(packPosition(b.getLocation()));
+
+                    if (b.hasMetadata(metaKey)) {
+                        writePos(outStream, packPosition(b.getLocation()));
+                       // outStream.write(packPosition(b.getLocation()));
+                    }
                 }
             }
         }
@@ -75,9 +83,16 @@ public class WaxStorage implements Listener {
             return;
         }
         container.set(key, PersistentDataType.BYTE_ARRAY, outStream.toByteArray());
-        long end =  System.nanoTime();
+
+        long end =  System.currentTimeMillis();
         System.out.println("Finished write after " + (end - start));
 
+    }
+
+    public void writePos(ByteArrayOutputStream outStream, int pos){
+        outStream.write(pos >>> 16 & 0xFF); //y coordinate in bits 16-23
+        outStream.write(pos >>> 8 & 0xFF); //x coordinate in bits 8-15
+        outStream.write(pos & 0xFF); //z coordinate in bits 0-7
     }
 
     public int packPosition(Location loc){
