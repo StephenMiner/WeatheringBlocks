@@ -6,11 +6,15 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class GiveItem implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public class GiveItem implements CommandExecutor, TabCompleter {
     private final WeatheringBlocks plugin;
 
     public GiveItem(){
@@ -79,11 +83,26 @@ public class GiveItem implements CommandExecutor {
         return false;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args){
+        int size = args.length;
+        if (size == 1) return items(args[0]);
+        return null;
+    }
+
+
+
 
     public boolean validId(String id){
         return switch (id){
             case "glue" -> true;
             default -> false;
         };
+    }
+
+    private List<String> items(String match){
+        List<String> items = new ArrayList<>();
+        items.add("glue");
+        return items;
     }
 }

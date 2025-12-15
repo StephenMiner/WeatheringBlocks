@@ -1,5 +1,7 @@
 package me.stephenminer.weatheringBlocks;
 
+import me.stephenminer.weatheringBlocks.command.GiveItem;
+import me.stephenminer.weatheringBlocks.command.Waxify;
 import me.stephenminer.weatheringBlocks.listener.RepairBlocks;
 import me.stephenminer.weatheringBlocks.listener.WaxStorage;
 import me.stephenminer.weatheringBlocks.transition.BlockTransitions;
@@ -62,6 +64,16 @@ public final class WeatheringBlocks extends JavaPlugin {
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new WaxStorage(), this);
         pm.registerEvents(new RepairBlocks(),this);
+    }
+
+    private void addCommands(){
+        Waxify waxifyCmd = new Waxify();
+        getCommand("waxify").setExecutor(waxifyCmd);
+        getCommand("waxify").setTabCompleter(waxifyCmd);
+
+        GiveItem giveItemCmd = new GiveItem();
+        getCommand("weatheringitem").setExecutor(giveItemCmd);
+        getCommand("weatheringitem").setTabCompleter(giveItemCmd);
     }
 
     private void loadBlacklist(){
@@ -215,5 +227,15 @@ public final class WeatheringBlocks extends JavaPlugin {
     }
     public int glueArea(){
         return this.settingsFile.getConfig().getInt("settings.glue.effect-area");
+    }
+
+    public List<String> filter(Collection<String> base, String match){
+        match = match.toLowerCase();
+        List<String> out = new ArrayList<>();
+        for (String item : base){
+            String temp = org.bukkit.ChatColor.stripColor(item).toLowerCase();
+            if (temp.contains(match)) out.add(temp);
+        }
+        return out;
     }
 }

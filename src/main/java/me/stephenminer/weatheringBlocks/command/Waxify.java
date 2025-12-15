@@ -5,13 +5,18 @@ import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Waxify implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+public class Waxify implements CommandExecutor, TabCompleter {
     private final WeatheringBlocks plugin;
 
 
@@ -35,6 +40,10 @@ public class Waxify implements CommandExecutor {
         Material mat = plugin.materialFromString(matStr);
         if (mat == null){
             sender.sendMessage(ChatColor.RED + "Could not find a material with the name: " + mat);
+            return false;
+        }
+        if (!mat.isBlock()){
+            sender.sendMessage(ChatColor.RED + "The chosen material needs to be a block!");
             return false;
         }
         if (args.length >= 2){
@@ -72,8 +81,15 @@ public class Waxify implements CommandExecutor {
         return false;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args){
+        int size = args.length;
+        if (size == 1) return blocks(args[0]);
+        return null;
+    }
 
-    public ItemStack waxedBlock(Material mat, int num){
+
+    private ItemStack waxedBlock(Material mat, int num){
         ItemStack item = new ItemStack(mat, num);
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(plugin.itemKey, PersistentDataType.STRING, "waxed");
@@ -82,4 +98,14 @@ public class Waxify implements CommandExecutor {
     }
 
 
+
+
+    private List<String> blocks(String match){
+        List<String> baseList = new ArrayList<>();
+        Registry.MATERIAL.forEach((mat)->{
+            if (mat.isBlock())
+                baseList.add(mat.name().toLowerCase());
+        });
+        return plugin.filter(baseList, match);
+    }
 }
