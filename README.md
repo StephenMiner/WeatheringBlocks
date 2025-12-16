@@ -26,6 +26,8 @@ nearby should completely block transitions or not (default = true).
 Note that your transition stage value cannot be less than 1. It will cause some problems
 with the glue feature if you do this. 1 is considered to be the "most repaired" state.
   
+It is ESSENTIAL that each transition group you make has at least one transition whose stage is 1. Otherwise, glue doesn't work.
+  
 ``pre-chance: 0.05688889``  
 This line defines what the probability is that given that a block that we have
 a transition for gets randomly ticked, that we will proceed to attempt the transition process. 
@@ -37,6 +39,8 @@ This line defines the base chance for the transition to occur once we pass the
 "pre-chance" check. This chance may be modified by if the options to lower the chance
 based on nearby blocks in the same group of later stages, or set to 0 if the option for 
 blocking transitions if a block of a later transition is present nearby.  
+  
+
   
 ```yaml
 states:
@@ -66,7 +70,13 @@ non water blocks in the range of our scan.
   
 You can have as many probability flags as you'd like.  
   
-You may also have as many potential states as you want too. 
+You may also have as many potential states as you want too.
+Also in this section, you may include
+```yaml
+repairs: stone_bricks
+```  
+This option is optional, however, if present, it defines what material to repair this block to when glue (see next section) is applied to it. Note that 
+this option only does something if the ``full-repair: `` option is ``false``. Otherwise, the block gets repaired to whichever transition has the same grouping and is state 1.
   
 # Glue
 The glue is pretty simple, you modify the parameters pre-defined in the ``settings.yml``
@@ -134,4 +144,4 @@ transition, the following will happen.
 3) If our rolled number was less than or equal to our chance from (2), then
 we move on to selecting what material to change the block to. This is done through weighted selection. All weights are summed, and then 
 we roll a number. We then progressively sum our weights from smallest to largest until the roll is less than the sum.  
-4) Finally the block transitions to the selected type
+4) Finally, the block transitions to the selected type
