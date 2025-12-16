@@ -83,7 +83,7 @@ public class WaxStorage implements Listener {
         for (int i = blocks.size()-1; i >= 0; i--){
             Block block = blocks.get(i);
             Block next = block.getRelative(dir);
-            System.out.println(block.getLocation());
+           // System.out.println(block.getLocation());
             if (block.hasMetadata(key)){
                 block.removeMetadata(key, plugin);
                 next.setMetadata(key, new FixedMetadataValue(plugin, true));
@@ -111,7 +111,7 @@ public class WaxStorage implements Listener {
         byte[] posArr = container.get(key, PersistentDataType.BYTE_ARRAY);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(posArr);
         while (inputStream.available() > 2) {
-            System.out.println(22);
+           // System.out.println(22);
             int d1 = inputStream.read();
             int d2 = inputStream.read();
             int d3 = inputStream.read();

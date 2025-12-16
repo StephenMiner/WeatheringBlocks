@@ -74,12 +74,25 @@ public class ChunkManager implements Listener {
                 int z = random.nextInt(16);
                 Material mat = chunk.getBlockType(x, y, z);
                 if (!plugin.transitions.containsKey(mat)) continue;
-
-                BlockTransitions transition = plugin.transitions.get(mat);
                 Location loc = new Location(world, chunk.getX() * 16 + x, y, chunk.getZ() * 16 + z);
+                if (!handleWorldGuard(loc)) {
+                    continue;
+                }
+                BlockTransitions transition = plugin.transitions.get(mat);
                 transition.updateState(loc, random);
             }
         }
     }
 
+    /**
+     *
+     * @param loc
+     * @return true if we can proceed with weathering, false
+     * if we are violating a world guard region we're not allowed to.
+     */
+    private boolean handleWorldGuard(Location loc){
+        if (!plugin.worldguard) return true;
+        WorldGuardDepend worldGuardDepend = new WorldGuardDepend();
+        return !worldGuardDepend.violatesRegion(loc);
+    }
 }

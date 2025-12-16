@@ -27,12 +27,21 @@ public final class WeatheringBlocks extends JavaPlugin {
     public Map<String, List<BlockTransitions>> transitionGroups;
     public Set<String> blacklistedWorlds;
 
+
+
     public NamespacedKey itemKey;
 
     public ChunkManager manager;
 
     public ConfigFile transitionFile;
     public ConfigFile settingsFile;
+
+    /*
+     *  World Guard Stuff
+     */
+    public Set<String> blacklistedWorldGuardRegions;
+    public boolean blacklistAllRegions;
+    public boolean worldguard;
 
     @Override
     public void onEnable() {
@@ -43,6 +52,10 @@ public final class WeatheringBlocks extends JavaPlugin {
         transitions = new HashMap<>();
         transitionFile = new ConfigFile(this, "blocks");
         this.settingsFile = new ConfigFile(this, "settings");
+        this.settingsFile.getConfig().options().copyDefaults(true);
+        this.settingsFile.saveDefaultConfig();
+        this.settingsFile.reloadConfig();
+
 
         this.itemKey = new NamespacedKey(this, "weathering-item");
 
@@ -62,6 +75,31 @@ public final class WeatheringBlocks extends JavaPlugin {
 
         for (World world : Bukkit.getWorlds()){
             manager.loadAll(world);
+        }
+
+        if (this.getServer().getPluginManager().isPluginEnabled("WorldGuard")){
+            this.getLogger().info("==============================");
+            this.getLogger().info("Loading World Guard extension");
+            this.getLogger().info("==============================");
+            worldguard = true;
+            blacklistAllRegions = false;
+            this.blacklistedWorldGuardRegions = new HashSet<>();
+            String path = "blacklist-worldguard-regions";
+            if (this.settingsFile.getConfig().contains(path)){
+                try {
+                    String str = this.settingsFile.getConfig().getString(path);
+                    if (str != null) {
+                        if (str.equalsIgnoreCase("all")) {
+                            blacklistAllRegions = true;
+                            return;
+                        }
+                    }
+                }catch (Exception ignored){}
+                List<String> blacklisted = this.settingsFile.getConfig().getStringList(path);
+                for (String entry : blacklisted) {
+                    this.blacklistedWorldGuardRegions.add(entry.toLowerCase());
+                }
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 blacklist-worlds:
   - "example world"
+blacklist-worldguard-regions:
+  - "exampleName"
 glue:
   name: "name"
   lore:
