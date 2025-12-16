@@ -198,7 +198,7 @@ public final class WeatheringBlocks extends JavaPlugin {
 
     public ItemStack constructGlue(){
         if (!this.settingsFile.getConfig().contains("glue")) return null;
-        String matStr = this.settingsFile.getConfig().getString("glue.name");
+        String matStr = this.settingsFile.getConfig().getString("glue.type");
         Material type = materialFromString(matStr);
         if (type == null){
             this.getLogger().warning("Failed to parse material " + matStr + ".");
@@ -228,10 +228,10 @@ public final class WeatheringBlocks extends JavaPlugin {
     }
 
     public boolean glueFullRepair(){
-        return this.settingsFile.getConfig().getBoolean("settings.glue.full-repair");
+        return this.settingsFile.getConfig().getBoolean("glue.full-repair");
     }
     public int glueArea(){
-        return this.settingsFile.getConfig().getInt("settings.glue.effect-area");
+        return this.settingsFile.getConfig().getInt("glue.effect-area");
     }
 
     public List<String> filter(Collection<String> base, String match){

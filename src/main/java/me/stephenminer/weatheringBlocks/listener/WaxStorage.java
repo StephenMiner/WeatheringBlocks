@@ -3,8 +3,15 @@ package me.stephenminer.weatheringBlocks.listener;
 import me.stephenminer.weatheringBlocks.WeatheringBlocks;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -14,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 public class WaxStorage implements Listener {
     private final NamespacedKey key;
@@ -37,6 +45,66 @@ public class WaxStorage implements Listener {
         writeChunkData(chunk);
     }
 
+    @EventHandler
+    public void cleanBreak(BlockBreakEvent event){
+        Block block = event.getBlock();
+        block.removeMetadata("weathering-waxed", plugin);
+    }
+
+    @EventHandler
+    public void cleanExplode(EntityExplodeEvent event){
+        List<Block> blocks = event.blockList();
+        for (Block block : blocks){
+            block.removeMetadata("weathering-waxed", plugin);
+        }
+    }
+
+    @EventHandler
+    public void cleanBExplode(BlockExplodeEvent event){
+        List<Block> blocks = event.blockList();
+        for (Block block : blocks){
+            block.removeMetadata("weathering-waxed", plugin);
+        }
+    }
+
+    @EventHandler
+    public void fallingBlockClean(EntitySpawnEvent event){
+        Block block = event.getLocation().getBlock();
+        block.removeMetadata("weathering-waxed",plugin);
+    }
+
+    @EventHandler
+    public void cleanPistonExtend(BlockPistonExtendEvent event){
+        List<Block> blocks = event.getBlocks();
+        BlockFace dir = event.getDirection();
+        String key = "weathering-waxed";
+    //    blocks.getLast().setType(Material.GLASS);
+    //    blocks.getLast().getRelative(dir).setType(Material.RED_STAINED_GLASS);
+        for (int i = blocks.size()-1; i >= 0; i--){
+            Block block = blocks.get(i);
+            Block next = block.getRelative(dir);
+            System.out.println(block.getLocation());
+            if (block.hasMetadata(key)){
+                block.removeMetadata(key, plugin);
+                next.setMetadata(key, new FixedMetadataValue(plugin, true));
+            }
+        }
+    }
+
+    @EventHandler
+    public void cleanPistonRetract(BlockPistonRetractEvent event){
+        List<Block> blocks = event.getBlocks();
+        BlockFace dir = event.getDirection().getOppositeFace();
+        String key = "weathering-waxed";
+        for (int i = 0; i < blocks.size(); i++){
+            Block block = blocks.get(i);
+            Block prev = block.getRelative(dir);
+            if (block.hasMetadata(key)){
+                block.removeMetadata(key,plugin);
+                prev.setMetadata(key, new FixedMetadataValue(plugin, true));
+            }
+        }
+    }
     public void readChunkData(Chunk chunk){
         PersistentDataContainer container = chunk.getPersistentDataContainer();
         if (!container.has(key, PersistentDataType.BYTE_ARRAY)) return;
@@ -85,7 +153,7 @@ public class WaxStorage implements Listener {
         container.set(key, PersistentDataType.BYTE_ARRAY, outStream.toByteArray());
 
         long end =  System.currentTimeMillis();
-        System.out.println("Finished write after " + (end - start));
+        //System.out.println("Finished write after " + (end - start));
 
     }
 

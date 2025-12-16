@@ -94,6 +94,8 @@ public class RepairBlocks implements Listener {
                 for (int y = center.getBlockY() - area; y <= center.getBlockY() + area; y++){
                     if (Math.abs(center.getBlockX() - x) + Math.abs(center.getBlockY() - y) + Math.abs(center.getBlockZ() - z) > area) continue;
                     BlockState state= world.getBlockState(x, y, z);
+                    Material mat = state.getType();
+                    if (!plugin.transitions.containsKey(mat)) continue;
                     Material changeTo = findRepairMat(state.getType());
                     if (changeTo == null) continue;
                     state.setType(changeTo);
@@ -106,10 +108,11 @@ public class RepairBlocks implements Listener {
     private Material findRepairMat(Material current){
         if (!plugin.transitions.containsKey(current)) return null;
         BlockTransitions transition = plugin.transitions.get(current);
-        if (transition.stage() == 0) return null;
+        if (transition.stage() == 1) return null;
         if (plugin.glueFullRepair())
-            return findStage(transition, 0);
+            return findStage(transition, 1);
         if (transition.repairTo() != null) return transition.repairTo();
+        System.out.println(transition.stage() - 1);
         return findStage(transition, transition.stage() - 1);
     }
 
@@ -120,12 +123,13 @@ public class RepairBlocks implements Listener {
         for (int i = 0; i < group.size(); i++){
             BlockTransitions transition  = group.get(i);
             if (transition.stage() != stage) continue;
-            if (i + 1 < group.size() - 1 && group.get(i + 1).stage() == transition.stage()) {
+            if (i + 1 < group.size() - 1 && group.get(i + 1).stage() == stage) {
                 pool.add(group.get(i+1).parent());
                 i++;
             }
             pool.add(transition.parent());
         }
+        if (pool.isEmpty()) return null;
         return pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
     }
 

@@ -46,6 +46,7 @@ public class BlockTransitions {
 
 
     public void updateState(Location loc, Random random){
+        if (loc.getBlock().hasMetadata("weathering-waxed")) return;
         if (random.nextFloat() >= preChance) return;
         BlockState updated = loc.getBlock().getState();
         Material mat = getNext(loc, random);
