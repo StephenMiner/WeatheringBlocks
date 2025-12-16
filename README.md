@@ -81,17 +81,41 @@ If This is false, then when you try to fix a block, it restored to a transition 
 than the current one. If multiple transitions satisfy this, then one is selected at random unless 
   
 ``effect-area: 4``  
-  
+
 This option defines the radius around the clicked block that the glue will affect.
 
-
-
-
-
-
-
-
-
+# Wax  
+Just like regular copper blocks, you may also wax any block that has transitions in this plugin with a honey comb!  
+  
+Waxed blocks will not transition to another state no matter what. Please note that waxed status may be deleted when blocks are moved
+by pistons.  
+  
+Also like copper blocks, you remove this wax by right-clicking the affected block with an axe!  
+  
+# Blacklisting Worlds  
+You may blacklist worlds in the ``settings.yml`` file as such:  
+```yaml
+blacklist-worlds:
+   - "world name1"
+   - "world name2"
+   - "etc..."
+```  
+Blacklisted worlds will not randomly tick blocks for our block transitions.
+# World Guard Support  
+World Guard support comes in the form of allowing you to Blacklist regions from the plugin, similar to how you blacklist worlds
+in the ``settings.yml`` file:  
+```yaml
+blacklist-worldguard-regions:
+   - "region1"
+   - "region2"
+   - "etc..."
+```  
+Blocks within regions that have these names will not be ticked for our transitions.  
+If you want no blocks in regions to weather or "be ticked" by this plugin, then 
+do the following:  
+```yaml
+blacklist-worldguard-regions: "all"
+```
 
 # The Technical Side of things
 How it works is nearly identical to copper weathering. If an appropriate block is "ticked" by minecraft's
